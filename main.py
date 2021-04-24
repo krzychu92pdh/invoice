@@ -10,28 +10,98 @@ import sys
 import shutil
 import config
 
-os.chdir(os.path.dirname(sys.argv[0]))
+# os.chdir(os.path.dirname(sys.argv[0]))
 
-months =["styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"]
 
-print("Program do faktur")
+def get_invoice_month_from_user():
+    months = ["styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień",
+              "październik", "listopad", "grudzień"]
 
-while True:
-    value = input("Podaj kwotę pieniedzy na jaką ma być wystawiona faktura: ")
-    value = value.replace(",",".")
-    try:
-        float(value)
-    except ValueError:
-        continue
-    break
+    while True:
+        month_of_invoice = input("Podaj miesiąc w którym wykonana była usługa: ")
+        month_of_invoice = month_of_invoice.lower()
+        if month_of_invoice in months:
+            break
+        else:
+            print("Nie ma takiego miesiąca spróbuj jeszcze raz:")
 
-while True:
-    month = input("Podaj miesiąc w którym wykonana była usługa:")
-    month = month.lower()
-    if month in months:
+
+def get_invoice_amount_from_user():
+    while True:
+        amount_of_invoice = input("Podaj kwotę pieniędzy na jaką ma być wystawiona faktura: ")
+        amount_of_invoice = amount_of_invoice.replace(",", ".")
+        try:
+            float(amount_of_invoice)
+        except ValueError:
+            continue
         break
-    else:
-        print("Nie ma takiego miesiąca spróbuj jeszcze raz:")
+
+
+def generate_invoice_document():
+    invoice_document = Document('template_inv.docx')
+    print(data)
+    findandreplace("Faktura nr FV", "" + data + "/" + lastdayofmonth2)
+    findandreplace("Data wystawienia:", lastdayofmonth)
+    findandreplace("Miejsce wystawienia", config.place)
+
+    invoice_document.tables[0].cell(1, 0).text = config.name_1
+    invoice_document.tables[0].cell(2, 0).text = config.adress_1
+    invoice_document.tables[0].cell(3, 0).text = config.additional_adress_1
+    invoice_document.tables[0].cell(4, 0).text = "NIP:" + config.nip_1
+    invoice_document.tables[0].cell(5, 0).text = "E-mail:" + config.mail_1
+    invoice_document.tables[0].cell(6, 0).text = "Tel.:" + config.tel_1
+    invoice_document.tables[0].cell(1, 0).paragraphs[0].runs[0].font.bold = True
+
+    invoice_document.tables[0].cell(1, 1).text = config.name_2
+    invoice_document.tables[0].cell(2, 1).text = config.adress_2
+    invoice_document.tables[0].cell(3, 1).text = config.additional_adress_2
+    invoice_document.tables[0].cell(4, 1).text = "NIP:" + config.nip_2
+    invoice_document.tables[0].cell(1, 1).paragraphs[0].runs[0].font.bold = True
+
+    invoice_document.tables[1].cell(1, 1).text = name
+    invoice_document.tables[1].cell(1, 5).text = netto
+    invoice_document.tables[1].cell(1, 7).text = netto
+    invoice_document.tables[1].cell(1, 9).text = netto
+    invoice_document.tables[1].cell(1, 5).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_document.tables[1].cell(1, 7).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_document.tables[1].cell(1, 9).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    invoice_document.tables[2].cell(1, 1).text = netto
+    invoice_document.tables[2].cell(1, 3).text = netto
+    invoice_document.tables[2].cell(2, 1).text = netto
+    invoice_document.tables[2].cell(2, 3).text = netto
+    invoice_document.tables[2].cell(1, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_document.tables[2].cell(1, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_document.tables[2].cell(2, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_document.tables[2].cell(2, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    invoice_document.tables[3].cell(0, 3).text = value + " PLN"
+    invoice_document.tables[3].cell(2, 3).text = value + " PLN"
+    invoice_document.tables[3].cell(3, 3).text = word_value
+    invoice_document.tables[3].cell(1, 1).text = termofpayment
+    invoice_document.tables[3].cell(2, 1).text = config.bank_name
+    invoice_document.tables[3].cell(3, 1).text = config.bank_account
+
+    invoice_document.tables[4].cell(0, 0).text = config.name_of_issuing
+    invoice_document.tables[4].cell(0, 0).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_document.tables[4].cell(0, 0).paragraphs[0].runs[0].font.bold = True
+
+
+def open_preview():
+    pass
+
+
+def confirm_invoice():
+    pass
+
+
+def save_files():
+    pass
+
+
+def delete_files():
+    pass
+
 
 ########################################################################################
 

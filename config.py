@@ -1,43 +1,47 @@
-########################## PLIK KONFIGURACYJNY ################################
-
 # miejsce zapisu faktury na dysku np. c:/
-path = " "
+file_name = ""
+path = "" + "/"
 # miejsce wystawienia faktury np. Poznań
-place = " "
+invoice_city = ""
 
 
-################### DANE SPRZEDAJĄCEJGO (WYSTAWIAJĄCY FAKTURĘ) ################
+# DANE SPRZEDAJĄCEGO (WYSTAWIAJĄCY FAKTURĘ)
 
 # Nazwa firmy wystawiającej fakturę
-name_1 = " "
+company_name = ""
 # Adres firmy (ulica i numer budynku)
-adress_1 = " "
+company_address_part1 = ""
 # Adres firmy c.d. (kod pocztowy i miejscowość)
-additional_adress_1 = " "
+company_address_part2 = ""
 # NIP firmy wystawiającej fakturę
-nip_1 = " "
+company_nip = ""
 # Adres email firmy wystawiającej fakturę
-mail_1 = " "
+company_email = ""
 # Telefon firmy wystawiającej fakturę
-tel_1 = " "
+company_tel = ""
 
-################### DANE KUPUJĄCEGO (OTRZYMUJĄCY FAKTURĘ) ################
+# DANE KUPUJĄCEGO (OTRZYMUJĄCY FAKTURĘ)
 
 # Nazwa firmy otrzymującej fakturę
-name_2 = " "
+buyer_name = ""
 # Adres firmy (ulica i numer budynku)
-adress_2 = " "
+buyer_address_part1 = ""
 # Adres firmy c.d. (kod pocztowy i miejscowość)
-additional_adress_2 = " "
+buyer_address_part2 = ""
 # NIP firmy otrzymującej fakturę
-nip_2 = " "
+buyer_nip = ""
 
-######################### DANE WYSTAWIAJĄCEGO FAKTURĘ ##########################
+# DANE WYSTAWIAJĄCEGO FAKTURĘ
 
 # Nazwa banku na jaki ma być zlecona zapłata za fakturę
-bank_name = " "
+bank_name = ""
 # Numer konta na jaki ma być zlecona zapłata za fakturę
-bank_account = " "
+bank_account = ""
 
 # Imię i nazwisko osoby upoważnionej do wystawienia faktury
-name_of_issuing = " "
+name_of_issuing = ""
+
+# Rodzaj używanego systemu operacyjnego
+# 1 - Windows
+# 2 - Linux
+os_user = "2"

@@ -1,232 +1,186 @@
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
-import datetime
-import csv
-import generator
-import webbrowser
-import subprocess
-import os
-import sys
-import shutil
 import config
+import datetime
+import calendar
+import subprocess
+import webbrowser
+import os
+import shutil
+import csv
 
-# os.chdir(os.path.dirname(sys.argv[0]))
 
-
-def get_invoice_month_from_user():
+def get_invoice_date_from_user_rehasport():
     months = ["styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień",
               "październik", "listopad", "grudzień"]
 
     while True:
-        month_of_invoice = input("Podaj miesiąc w którym wykonana była usługa: ")
-        month_of_invoice = month_of_invoice.lower()
-        if month_of_invoice in months:
+        invoice_month_word = input("Podaj miesiąc w którym wykonana była usługa:")
+        invoice_month_word = invoice_month_word.lower()
+        if invoice_month_word in months:
             break
         else:
-            print("Nie ma takiego miesiąca spróbuj jeszcze raz:")
+            print("Nie ma takiego miesiąca spróbuj jeszcze raz:\n")
+    number_of_month = months.index(invoice_month_word)+1
+    today = datetime.date.today()
+    current_year = today.year
+    number_of_last_day = calendar.monthrange(current_year, number_of_month)[1]
+    if number_of_month == 12:
+        current_year = int(today.year) - 1
+        check_year = input("Czy rok się zgadza? y/n: " + str(current_year))
+        check_year = check_year.lower()
+        if check_year != "y" or check_year != "yes":
+            current_year = input("Wprowadź rok manualnie: ")
+    date_of_invoice = today.replace(day=number_of_last_day, month=int(number_of_month), year=int(current_year))
+    return invoice_month_word, date_of_invoice, current_year, number_of_month
+
+
+def get_invoice_date_from_user_manual():
+    pass
+
+
+def generate_date_of_payment(date_of_invoice):
+    date_of_payment = date_of_invoice + datetime.timedelta(days=14)
+    return date_of_payment
 
 
 def get_invoice_amount_from_user():
     while True:
-        amount_of_invoice = input("Podaj kwotę pieniędzy na jaką ma być wystawiona faktura: ")
-        amount_of_invoice = amount_of_invoice.replace(",", ".")
+        amount = input("Podaj kwotę pieniędzy na jaką ma być wystawiona faktura: ")
+        amount = amount.replace(",", ".")
+        if int(amount):
+            amount = amount + ".00"
         try:
-            float(amount_of_invoice)
+            float(amount)
         except ValueError:
+            print("Podano błędną wartość, spróbuj jeszcze raz! \n")
             continue
         break
+    return amount
 
 
-def generate_invoice_document():
-    invoice_document = Document('template_inv.docx')
-    print(data)
-    findandreplace("Faktura nr FV", "" + data + "/" + lastdayofmonth2)
-    findandreplace("Data wystawienia:", lastdayofmonth)
-    findandreplace("Miejsce wystawienia", config.place)
-
-    invoice_document.tables[0].cell(1, 0).text = config.name_1
-    invoice_document.tables[0].cell(2, 0).text = config.adress_1
-    invoice_document.tables[0].cell(3, 0).text = config.additional_adress_1
-    invoice_document.tables[0].cell(4, 0).text = "NIP:" + config.nip_1
-    invoice_document.tables[0].cell(5, 0).text = "E-mail:" + config.mail_1
-    invoice_document.tables[0].cell(6, 0).text = "Tel.:" + config.tel_1
-    invoice_document.tables[0].cell(1, 0).paragraphs[0].runs[0].font.bold = True
-
-    invoice_document.tables[0].cell(1, 1).text = config.name_2
-    invoice_document.tables[0].cell(2, 1).text = config.adress_2
-    invoice_document.tables[0].cell(3, 1).text = config.additional_adress_2
-    invoice_document.tables[0].cell(4, 1).text = "NIP:" + config.nip_2
-    invoice_document.tables[0].cell(1, 1).paragraphs[0].runs[0].font.bold = True
-
-    invoice_document.tables[1].cell(1, 1).text = name
-    invoice_document.tables[1].cell(1, 5).text = netto
-    invoice_document.tables[1].cell(1, 7).text = netto
-    invoice_document.tables[1].cell(1, 9).text = netto
-    invoice_document.tables[1].cell(1, 5).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    invoice_document.tables[1].cell(1, 7).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    invoice_document.tables[1].cell(1, 9).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    invoice_document.tables[2].cell(1, 1).text = netto
-    invoice_document.tables[2].cell(1, 3).text = netto
-    invoice_document.tables[2].cell(2, 1).text = netto
-    invoice_document.tables[2].cell(2, 3).text = netto
-    invoice_document.tables[2].cell(1, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    invoice_document.tables[2].cell(1, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    invoice_document.tables[2].cell(2, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    invoice_document.tables[2].cell(2, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    invoice_document.tables[3].cell(0, 3).text = value + " PLN"
-    invoice_document.tables[3].cell(2, 3).text = value + " PLN"
-    invoice_document.tables[3].cell(3, 3).text = word_value
-    invoice_document.tables[3].cell(1, 1).text = termofpayment
-    invoice_document.tables[3].cell(2, 1).text = config.bank_name
-    invoice_document.tables[3].cell(3, 1).text = config.bank_account
-
-    invoice_document.tables[4].cell(0, 0).text = config.name_of_issuing
-    invoice_document.tables[4].cell(0, 0).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    invoice_document.tables[4].cell(0, 0).paragraphs[0].runs[0].font.bold = True
+def generate_full_file_name(invoice_month_word, current_year):
+    full_file_name = config.file_name + " - " + invoice_month_word + " " + str(current_year)
+    return full_file_name
 
 
-def open_preview():
-    pass
+def generate_invoice_document(invoice_month_word, invoice_amount, date_of_invoice, date_of_payment, full_file_name):
+    def find_and_replace(find, replace):
+        for paragraph in invoice_doc.paragraphs:
+            if find in paragraph.text:
+                paragraph.add_run(replace).bold = True
+
+    invoice_doc = Document('template_inv.docx')
+    # HEADER
+    nr_of_invoice = "1"
+
+    find_and_replace("Faktura nr FV", date_of_invoice.strftime(f"{nr_of_invoice}/%m/%Y"))
+    find_and_replace("Data wystawienia:", date_of_invoice.strftime("%d/%m/%Y"))
+    find_and_replace("Miejsce wystawienia:", config.invoice_city)
+
+    # TABLES
+    invoice_doc.tables[0].cell(1, 0).text = config.company_name.upper()
+    invoice_doc.tables[0].cell(2, 0).text = config.company_address_part1
+    invoice_doc.tables[0].cell(3, 0).text = config.company_address_part2
+    invoice_doc.tables[0].cell(4, 0).text = config.company_nip
+    invoice_doc.tables[0].cell(5, 0).text = config.company_email
+    invoice_doc.tables[0].cell(6, 0).text = config.company_tel
+    invoice_doc.tables[0].cell(1, 0).paragraphs[0].runs[0].font.bold = True
+
+    invoice_doc.tables[0].cell(1, 1).text = config.buyer_name.upper()
+    invoice_doc.tables[0].cell(2, 1).text = config.buyer_address_part1
+    invoice_doc.tables[0].cell(3, 1).text = config.buyer_address_part2
+    invoice_doc.tables[0].cell(4, 1).text = config.buyer_nip
+    invoice_doc.tables[0].cell(1, 1).paragraphs[0].runs[0].font.bold = True
+
+    invoice_doc.tables[1].cell(1, 1).text = f"Usługi medyczne wykonane w miesiącu - {invoice_month_word} " \
+                                            f"{date_of_invoice.strftime('%Y')}"
+    invoice_doc.tables[1].cell(1, 5).text = invoice_amount
+    invoice_doc.tables[1].cell(1, 7).text = invoice_amount
+    invoice_doc.tables[1].cell(1, 9).text = invoice_amount
+    invoice_doc.tables[1].cell(1, 5).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_doc.tables[1].cell(1, 7).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_doc.tables[1].cell(1, 9).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    invoice_doc.tables[2].cell(1, 1).text = invoice_amount
+    invoice_doc.tables[2].cell(1, 3).text = invoice_amount
+    invoice_doc.tables[2].cell(2, 1).text = invoice_amount
+    invoice_doc.tables[2].cell(2, 3).text = invoice_amount
+    invoice_doc.tables[2].cell(1, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_doc.tables[2].cell(1, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_doc.tables[2].cell(2, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    invoice_doc.tables[2].cell(2, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    invoice_doc.tables[3].cell(0, 3).text = invoice_amount + " PLN"
+    invoice_doc.tables[3].cell(2, 3).text = invoice_amount + " PLN"
+    invoice_doc.tables[3].cell(2, 1).text = config.bank_name
+    invoice_doc.tables[3].cell(3, 1).text = config.bank_account
+    invoice_doc.tables[3].cell(3, 3).text = "word_value"
+    invoice_doc.tables[3].cell(1, 1).text = date_of_payment.strftime("%d/%m/%Y")
+
+    invoice_doc.tables[4].cell(0, 0).text = config.name_of_issuing
+    invoice_doc.tables[4].cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    invoice_doc.tables[4].cell(0, 0).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    invoice_doc.save(full_file_name + ".docx")
 
 
-def confirm_invoice():
-    pass
-
-
-def save_files():
-    pass
-
-
-def delete_files():
-    pass
-
-
-########################################################################################
-
-monthnr = months.index(month) + 1
-
-today = datetime.date.today()
-year = today.strftime("%Y")
-if monthnr != 12:
-    lastday = today.replace(day=1, month=int(monthnr+1), year=int(year)) - datetime.timedelta(days=1)
-elif monthnr == 12:
-    lastday = today.replace(day=1, month=1, year=int(year)+1) - datetime.timedelta(days=1)
-lastdayofmonth = lastday.strftime("%d/%m/%Y")
-lastdayofmonth2 = lastday.strftime("%m/%Y")
-term = lastday + datetime.timedelta(days=14)
-termofpayment = term.strftime("%d/%m/%Y")
-
-name = "usługi medyczne wykonane w miesiącu - "+ month + " "+year+""
-netto = value
-
-with open('inv_nr.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile)
-    list = list(reader)
-    for i in list:
-        if i.get("month") == str(monthnr):
-            y = int(i['nr_inv'])
-            i['nr_inv'] = str(y+1)
-            data = i['nr_inv']
-
-with open('inv_nr.csv', "w", newline='') as csvfile:
-    writer = csv.DictWriter(csvfile, ['month', 'nr_inv'])
-    writer.writeheader()
-    writer.writerows(list)
-
-word_value = str(generator.generator(value))
-#############################################################################
-
-def findandreplace(find, replace):
-    for paragraph in document.paragraphs:
-        if find in paragraph.text:
-            paragraph.add_run(replace).bold = True
-
-
-document = Document('template_inv.docx')
-print(data)
-findandreplace("Faktura nr FV", ""+data+"/" + lastdayofmonth2)
-findandreplace("Data wystawienia:", lastdayofmonth)
-findandreplace("Miejsce wystawienia", config.place)
-
-###################### TABLE1 #####################
-document.tables[0].cell(1, 0).text = config.name_1
-document.tables[0].cell(2, 0).text = config.adress_1
-document.tables[0].cell(3, 0).text = config.additional_adress_1
-document.tables[0].cell(4, 0).text = "NIP:" + config.nip_1
-document.tables[0].cell(5, 0).text = "E-mail:" + config.mail_1
-document.tables[0].cell(6, 0).text = "Tel.:" + config.tel_1
-document.tables[0].cell(1, 0).paragraphs[0].runs[0].font.bold = True
-
-document.tables[0].cell(1, 1).text = config.name_2
-document.tables[0].cell(2, 1).text = config.adress_2
-document.tables[0].cell(3, 1).text = config.additional_adress_2
-document.tables[0].cell(4, 1).text = "NIP:" + config. nip_2
-document.tables[0].cell(1, 1).paragraphs[0].runs[0].font.bold = True
-
-
-###################### TABLE2 #####################
-document.tables[1].cell(1, 1).text = name
-document.tables[1].cell(1, 5).text = netto
-document.tables[1].cell(1, 7).text = netto
-document.tables[1].cell(1, 9).text = netto
-document.tables[1].cell(1, 5).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-document.tables[1].cell(1, 7).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-document.tables[1].cell(1, 9).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-###################### TABLE3 #####################
-document.tables[2].cell(1, 1).text = netto
-document.tables[2].cell(1, 3).text = netto
-document.tables[2].cell(2, 1).text = netto
-document.tables[2].cell(2, 3).text = netto
-document.tables[2].cell(1, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-document.tables[2].cell(1, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-document.tables[2].cell(2, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-document.tables[2].cell(2, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-document.tables[3].cell(0, 3).text = value+" PLN"
-document.tables[3].cell(2, 3).text = value+" PLN"
-document.tables[3].cell(3, 3).text = word_value
-document.tables[3].cell(1 ,1).text = termofpayment
-document.tables[3].cell(2 ,1).text = config.bank_name
-document.tables[3].cell(3 ,1).text = config.bank_account
-
-
-document.tables[4].cell(0 ,0).text = config.name_of_issuing
-document.tables[4].cell(0, 0).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-document.tables[4].cell(0, 0).paragraphs[0].runs[0].font.bold = True
-
-nameoffile = "faktura rehasport nr "+data+" - "+ month +" "+ year
-document.save(nameoffile+".docx")
-output = subprocess.check_output(['libreoffice', '--convert-to', 'pdf', nameoffile+".docx"])
-webbrowser.open(nameoffile+".pdf", new=1)
-
-
-dest_fpath = config.path
-
-while True:
-    approve = input("Czy faktura jest ok? y/n: ")
-    approve = approve.lower()
-    if approve == "y":
-        os.makedirs(os.path.dirname(dest_fpath+month+"/"), exist_ok=True)
-        shutil.move(nameoffile+".docx", dest_fpath+month+"/"+nameoffile+".docx")
-        shutil.move(nameoffile+".pdf", dest_fpath+month+"/"+nameoffile+".pdf")
-        break
-    elif approve == "n":
-        while True:
-            x = input("Wybierz opcję: \ndel - usuń plik \nedit - zostaw plik .docx: ")
-            if x == "del":
-                os.remove(nameoffile+".docx")
-                os.remove(nameoffile+".pdf")
-                print("Usunięto wszystkie pliki")
-                break
-            if x == "edit":
-                os.remove(nameoffile+".pdf")
-                print("Popraw błędy w pliku .docx")
-                break
-            else:
-                continue
-        break
+def convert_to_pdf(full_file_name):
+    if config.os_user == "1":
+        pass
+    elif config.os_user == "2":
+        subprocess.check_output(['libreoffice', '--convert-to', 'pdf', full_file_name + ".docx"])
     else:
-        continue
+        print("Podano złą wartość w pliku config 'os_user'")
+
+
+def open_preview(full_file_name):
+    webbrowser.open(full_file_name + ".pdf", new=1)
+
+
+def confirm_invoice_from_user(invoice_month_word, full_file_name):
+    while True:
+        approval = input("Czy faktura jest ok? y/n: ")
+        approval = approval.lower()
+        if approval == "y":
+            os.makedirs(os.path.dirname(config.path + invoice_month_word + "/"), exist_ok=True)
+            shutil.move(full_file_name + ".docx", config.path + invoice_month_word + "/" + full_file_name + ".docx")
+            shutil.move(full_file_name + ".pdf", config.path + invoice_month_word + "/" + full_file_name + ".pdf")
+            break
+        elif approval == "n":
+            while True:
+                x = input("\nWybierz opcję: \ndel - usuń plik \nedit - zostaw plik .docx: ")
+                if x == "del":
+                    os.remove(full_file_name + ".docx")
+                    os.remove(full_file_name + ".pdf")
+                    print("\nUsunięto wszystkie pliki")
+                    break
+                if x == "edit":
+                    os.makedirs(os.path.dirname(config.path + invoice_month_word + "/"), exist_ok=True)
+                    shutil.move(full_file_name + ".docx", config.path + invoice_month_word + full_file_name + ".docx")
+                    os.remove(full_file_name + ".pdf")
+                    print("\nPopraw błędy w pliku .docx \n Plik znajduje się w katalogu miesiąca")
+                    break
+                else:
+                    continue
+            break
+        else:
+            continue
+
+
+def main():
+    invoice_month_word, date_of_invoice, current_year, number_of_month = get_invoice_date_from_user_rehasport()
+    date_of_payment = generate_date_of_payment(date_of_invoice)
+    invoice_amount = get_invoice_amount_from_user()
+    full_file_name = generate_full_file_name(invoice_month_word, current_year)
+
+    print(f"\nMIESIĄC WYSTAWIENIA FAKTURY: {invoice_month_word}")
+    print(f"KWOTA NA FAKTURZE: {invoice_amount} PLN")
+    generate_invoice_document(invoice_month_word, invoice_amount, date_of_invoice, date_of_payment, full_file_name)
+    convert_to_pdf(full_file_name)
+    open_preview(full_file_name)
+    confirm_invoice_from_user(invoice_month_word, full_file_name)
+
+
+if __name__ == '__main__':
+    main()

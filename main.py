@@ -15,7 +15,7 @@ while True:
 
     else:
         break
-
+###
 insert_total_amount()
 payment_information()
 save_as_docx()
